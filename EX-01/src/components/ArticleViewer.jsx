@@ -2,6 +2,8 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 export default function ArticlePage() {
   const { id } = useParams();
   const [article, setArticle] = useState(null);
@@ -10,8 +12,10 @@ export default function ArticlePage() {
 
   useEffect(() => {
     // Function to fetch article by ID
-    let { id } = useParams();
-    axios.get(`http://localhost:5000/articles/${id}`)
+    axios.get(`${apiBaseUrl}/articles/${id}`)
+      .then(res => setArticle(res.data))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) return <div>Loading article...</div>;

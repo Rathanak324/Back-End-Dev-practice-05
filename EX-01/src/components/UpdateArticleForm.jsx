@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 export default function UpdateArticleForm() {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     title: '',
     content: '',
@@ -11,8 +17,23 @@ export default function UpdateArticleForm() {
 
   // Fetch to prefill a form and update an existing article
   useEffect(() => {
+    const fetchArticle = async () => {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/articles/${id}`);
+        setForm({
+          title: response.data.title,
+          content: response.data.content,
+          journalistId: response.data.journalistId,
+          categoryId: response.data.categoryId,
+        });
+      } catch (error) {
+        console.error(error);
+        alert('Failed to load article');
+      }
+    };
 
-  }, []);
+    fetchArticle();
+  }, [id]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -20,7 +41,14 @@ export default function UpdateArticleForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Update article with axios
+    try {
+      await axios.put(`${apiBaseUrl}/articles/${id}`, form);
+      alert('Article updated successfully');
+      navigate('/');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to update article');
+    }
   };
 
   return (
